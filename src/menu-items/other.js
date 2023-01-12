@@ -16,9 +16,9 @@ const other = {
             type: 'item',
             url: '/sample-page',
             icon: icons.IconBrandChrome,
-            breadcrumbs: false
-        }
-    ]
+            breadcrumbs: false,
+        },
+    ],
 };
 
 export default other;

@@ -1,8 +1,8 @@
 {
-    "name": "berry-material-react-free",
+    "name": "mubarak-invocies-dashboard",
     "version": "3.2.0",
     "private": true,
-    "homepage": "https://berrydashboard.io/free",
+    "homepage": "https://berrydashboard.io",
     "dependencies": {
         "@emotion/cache": "^11.9.3",
         "@emotion/react": "^11.9.3",
@@ -15,6 +15,7 @@
         "@mui/utils": "^5.8.6",
         "@tabler/icons": "^1.72.0",
         "apexcharts": "^3.35.3",
+        "axios": "^1.2.2",
         "formik": "^2.2.9",
         "framer-motion": "^6.3.16",
         "material-ui-popup-state": "^4.0.1",

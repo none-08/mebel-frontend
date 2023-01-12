@@ -8,7 +8,10 @@ import Loadable from 'ui-component/Loadable';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
 // utilities routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
+const UtilsTypography = Loadable(lazy(() => import('views/utilities/invoices/Typography')));
+const UtilsInvocieDetail = Loadable(lazy(() => import('views/utilities/invoices/Invoice-detail')));
+const UtilsInvocieEdit = Loadable(lazy(() => import('views/utilities/invoices/Invoice-edit')));
+
 const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
 const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 
@@ -23,50 +26,63 @@ const MainRoutes = {
     children: [
         {
             path: '/',
-            element: <DashboardDefault />
+            element: <DashboardDefault />,
         },
         {
             path: 'dashboard',
             children: [
                 {
                     path: 'default',
-                    element: <DashboardDefault />
-                }
-            ]
+                    element: <DashboardDefault />,
+                },
+            ],
         },
         {
             path: 'utils',
             children: [
                 {
-                    path: 'util-typography',
-                    element: <UtilsTypography />
-                }
-            ]
+                    path: 'util-invoices',
+                    children: [
+                        {
+                            path: '',
+                            element: <UtilsTypography />,
+                        },
+                        {
+                            path: ':id',
+                            children: [
+                                {
+                                    path: '',
+                                    element: <UtilsInvocieDetail />,
+                                },
+                                {
+                                    path: 'edit',
+                                    element: <UtilsInvocieEdit />,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
-            path: 'utils',
+            path: 'pages',
             children: [
                 {
-                    path: 'util-color',
-                    element: <UtilsColor />
-                }
-            ]
-        },
-        {
-            path: 'utils',
-            children: [
+                    path: 'register/user',
+                    element: <UtilsColor />,
+                },
                 {
-                    path: 'util-shadow',
-                    element: <UtilsShadow />
-                }
-            ]
+                    path: 'register/product',
+                    element: <UtilsShadow />,
+                },
+            ],
         },
 
         {
             path: 'sample-page',
-            element: <SamplePage />
-        }
-    ]
+            element: <SamplePage />,
+        },
+    ],
 };
 
 export default MainRoutes;

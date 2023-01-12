@@ -6,7 +6,7 @@ const icons = {
     IconTypography,
     IconPalette,
     IconShadow,
-    IconWindmill
+    IconWindmill,
 };
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
@@ -17,30 +17,30 @@ const utilities = {
     type: 'group',
     children: [
         {
-            id: 'util-typography',
-            title: 'Typography',
+            id: 'util-invoices',
+            title: 'Invoices',
             type: 'item',
-            url: '/utils/util-typography',
+            url: '/utils/util-invoices',
             icon: icons.IconTypography,
-            breadcrumbs: false
+            breadcrumbs: false,
         },
-        {
-            id: 'util-color',
-            title: 'Color',
-            type: 'item',
-            url: '/utils/util-color',
-            icon: icons.IconPalette,
-            breadcrumbs: false
-        },
-        {
-            id: 'util-shadow',
-            title: 'Shadow',
-            type: 'item',
-            url: '/utils/util-shadow',
-            icon: icons.IconShadow,
-            breadcrumbs: false
-        }
-    ]
+        // {
+        //     id: 'util-shadow',
+        //     title: 'Shadow',
+        //     type: 'item',
+        //     url: '/utils/util-shadow',
+        //     icon: icons.IconShadow,
+        //     breadcrumbs: false
+        // },
+        // {
+        //     id: 'util-color',
+        //     title: 'Color',
+        //     type: 'item',
+        //     url: '/utils/util-color',
+        //     icon: icons.IconPalette,
+        //     breadcrumbs: false
+        // }
+    ],
 };
 
 export default utilities;

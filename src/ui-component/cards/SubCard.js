@@ -17,9 +17,9 @@ const SubCard = forwardRef(({ children, content, contentClass, darkTitle, second
                 border: '1px solid',
                 borderColor: theme.palette.primary.light,
                 ':hover': {
-                    boxShadow: '0 2px 14px 0 rgb(32 40 45 / 8%)'
+                    boxShadow: '0 2px 14px 0 rgb(32 40 45 / 8%)',
                 },
-                ...sx
+                ...sx,
             }}
             {...others}
         >
@@ -32,7 +32,7 @@ const SubCard = forwardRef(({ children, content, contentClass, darkTitle, second
                 <Divider
                     sx={{
                         opacity: 1,
-                        borderColor: theme.palette.primary.light
+                        borderColor: theme.palette.primary.light,
                     }}
                 />
             )}
@@ -56,11 +56,11 @@ SubCard.propTypes = {
     secondary: PropTypes.oneOfType([PropTypes.node, PropTypes.string, PropTypes.object]),
     sx: PropTypes.object,
     contentSX: PropTypes.object,
-    title: PropTypes.oneOfType([PropTypes.node, PropTypes.string, PropTypes.object])
+    title: PropTypes.oneOfType([PropTypes.node, PropTypes.string, PropTypes.object]),
 };
 
 SubCard.defaultProps = {
-    content: true
+    content: true,
 };
 
 export default SubCard;

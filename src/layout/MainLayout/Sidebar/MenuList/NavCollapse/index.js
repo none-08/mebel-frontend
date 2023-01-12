@@ -50,7 +50,7 @@ const NavCollapse = ({ menu, level }) => {
         <FiberManualRecordIcon
             sx={{
                 width: selected === menu.id ? 8 : 6,
-                height: selected === menu.id ? 8 : 6
+                height: selected === menu.id ? 8 : 6,
             }}
             fontSize={level > 0 ? 'inherit' : 'medium'}
         />
@@ -65,7 +65,7 @@ const NavCollapse = ({ menu, level }) => {
                     alignItems: 'flex-start',
                     backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
                     py: level > 1 ? 1 : 1.25,
-                    pl: `${level * 24}px`
+                    pl: `${level * 24}px`,
                 }}
                 selected={selected === menu.id}
                 onClick={handleClick}
@@ -105,8 +105,8 @@ const NavCollapse = ({ menu, level }) => {
                             height: '100%',
                             width: '1px',
                             opacity: 1,
-                            background: theme.palette.primary.light
-                        }
+                            background: theme.palette.primary.light,
+                        },
                     }}
                 >
                     {menus}
@@ -118,7 +118,7 @@ const NavCollapse = ({ menu, level }) => {
 
 NavCollapse.propTypes = {
     menu: PropTypes.object,
-    level: PropTypes.number
+    level: PropTypes.number,
 };
 
 export default NavCollapse;

@@ -1,125 +1,113 @@
 import PropTypes from 'prop-types';
 
 // material-ui
-import { Box, Card, Grid } from '@mui/material';
+import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
 
 // project imports
-import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
+import { FormikInput, Input } from 'custom-components';
 import { gridSpacing } from 'store/constant';
-
-// ===============================|| SHADOW BOX ||=============================== //
-
-const ShadowBox = ({ shadow }) => (
-    <Card sx={{ mb: 3, boxShadow: shadow }}>
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                py: 4.5,
-                bgcolor: 'primary.light',
-                color: 'grey.800'
-            }}
-        >
-            <Box sx={{ color: 'inherit' }}>boxShadow: {shadow}</Box>
-        </Box>
-    </Card>
-);
-
-ShadowBox.propTypes = {
-    shadow: PropTypes.string.isRequired
-};
+import { CancelRounded, PersonAddAlt1Rounded } from '@mui/icons-material';
+import { Form, Formik } from 'formik';
+import * as yup from 'yup';
 
 // ============================|| UTILITIES SHADOW ||============================ //
 
-const UtilitiesShadow = () => (
-    <MainCard title="Basic Shadow">
-        <Grid container spacing={gridSpacing}>
-            <Grid item xs={12}>
-                <SubCard title="Basic Shadow">
-                    <Grid container spacing={gridSpacing}>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="0" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="1" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="2" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="3" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="4" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="5" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="6" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="7" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="8" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="9" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="10" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="11" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="12" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="13" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="14" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="15" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="16" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="17" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="18" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="19" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="20" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="21" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="22" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="23" />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <ShadowBox shadow="24" />
-                        </Grid>
-                    </Grid>
-                </SubCard>
+const UtilitiesShadow = () => {
+    const selectOptions = [
+        {
+            value: '',
+            text: 'Select',
+        },
+        {
+            value: 'abror',
+            text: 'Abror',
+        },
+        {
+            value: 'nuriddin',
+            text: 'Nuriddin',
+        },
+    ];
+    const yupValidateSchema = yup.object().shape({
+        product_configuration: yup.string('*Enter string').required("*Can't be empty"),
+        product_price: yup.number('*Enter number').required("*Can't be empty"),
+        product_select: yup.string('*Enter string').required("*Can't be empty"),
+    });
+
+    return (
+        <MainCard title="Register Product">
+            <Grid container spacing={gridSpacing} justifyContent="center">
+                <Grid item xs={12} sm={10} md={8} lg={8} xl={8}>
+                    <Card
+                        raised
+                        sx={{
+                            bgcolor: '#e3f2fd',
+                            boxShadow: 1,
+                        }}
+                    >
+                        <CardContent>
+                            <Formik
+                                initialValues={{
+                                    product_configuration: '',
+                                    product_price: '',
+                                    product_select: '',
+                                }}
+                                validationSchema={yupValidateSchema}
+                                validateOnChange
+                            >
+                                <Form>
+                                    <Grid container spacing={10} direction="column">
+                                        <Grid item>
+                                            <Typography color="darkblue" variant="h2">
+                                                New Product
+                                            </Typography>
+                                        </Grid>
+                                        <Grid
+                                            item
+                                            container
+                                            spacing={2}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                            }}
+                                        >
+                                            <Grid item width={{ xs: '100%', sm: '100%', md: '50%', lg: '50%' }}>
+                                                <FormikInput name="product_configuration" inputText="Product configuration" />
+                                            </Grid>
+                                            <Grid item width={{ xs: '100%', sm: '100%', md: '50%', lg: '50%' }}>
+                                                <FormikInput name="product_price" inputText="Product price" />
+                                            </Grid>
+                                            <Grid item width="100%">
+                                                <FormikInput
+                                                    name="product_select"
+                                                    select={true}
+                                                    options={selectOptions}
+                                                    inputText="Product select"
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item container justifyContent="space-between">
+                                            <Grid item>
+                                                <Button variant="contained" color="error" startIcon={<CancelRounded />}>
+                                                    Discard
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                <Button variant="contained" color="info" startIcon={<PersonAddAlt1Rounded />}>
+                                                    Add client
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Form>
+                            </Formik>
+                        </CardContent>
+                    </Card>
+                </Grid>
             </Grid>
-        </Grid>
-    </MainCard>
-);
+        </MainCard>
+    );
+};
 
 export default UtilitiesShadow;

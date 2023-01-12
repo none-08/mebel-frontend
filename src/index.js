@@ -12,17 +12,20 @@ import { store } from 'store';
 // style + assets
 import 'assets/scss/style.scss';
 import config from './config';
+import React from 'react';
 
 // ==============================|| REACT DOM RENDER  ||============================== //
 
 const container = document.getElementById('root');
 const root = createRoot(container); // createRoot(container!) if you use TypeScript
 root.render(
-    <Provider store={store}>
-        <BrowserRouter basename={config.basename}>
-            <App />
-        </BrowserRouter>
-    </Provider>
+    <React.StrictMode>
+        <Provider store={store}>
+            <BrowserRouter basename={config.basename}>
+                <App />
+            </BrowserRouter>
+        </Provider>
+    </React.StrictMode>,
 );
 
 // If you want your app to work offline and load faster, you can change

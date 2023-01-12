@@ -3,41 +3,40 @@ import { IconKey } from '@tabler/icons';
 
 // constant
 const icons = {
-    IconKey
+    IconKey,
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
 
 const pages = {
     id: 'pages',
-    title: 'Pages',
-    caption: 'Pages Caption',
+    title: 'Register',
+    caption: 'Register order',
     type: 'group',
     children: [
         {
-            id: 'users',
-            title: 'Authentication',
+            id: 'redister',
+            title: 'Register',
             type: 'collapse',
             icon: icons.IconKey,
-
             children: [
                 {
-                    id: 'login3',
-                    title: 'Login',
+                    id: 'user',
+                    title: 'User',
                     type: 'item',
-                    url: '/pages/login/login3',
-                    target: true
-                }
-                // {
-                //     id: 'register3',
-                //     title: 'Register',
-                //     type: 'item',
-                //     url: '/pages/register/register3',
-                //     target: true
-                // }
-            ]
-        }
-    ]
+                    url: '/pages/register/user',
+                    target: false,
+                },
+                {
+                    id: 'product',
+                    title: 'Product',
+                    type: 'item',
+                    url: '/pages/register/product',
+                    target: false,
+                },
+            ],
+        },
+    ],
 };
 
 export default pages;
