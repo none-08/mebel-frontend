@@ -12,8 +12,6 @@ export const FormikInput = (props) => {
                     name: field.name,
                     onChange: field.onChange,
                     value: field.value,
-                    checked: field.checked,
-                    multiple: field.multiple,
                 }}
                 {...props}
                 meta={meta}

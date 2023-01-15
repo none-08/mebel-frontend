@@ -14,7 +14,7 @@ const other = {
             id: 'sample-page',
             title: 'Sample Page',
             type: 'item',
-            url: '/sample-page',
+            url: '/utils/util-invoices/:id/mark-paid/:item', // WHATTT!!
             icon: icons.IconBrandChrome,
             breadcrumbs: false,
         },

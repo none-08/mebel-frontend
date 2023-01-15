@@ -28,7 +28,7 @@ const MainCard = forwardRef(
             title,
             ...others
         },
-        ref,
+        ref
     ) => {
         const theme = useTheme();
 
@@ -63,7 +63,7 @@ const MainCard = forwardRef(
                 {!content && children}
             </Card>
         );
-    },
+    }
 );
 
 MainCard.propTypes = {

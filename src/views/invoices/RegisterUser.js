@@ -16,14 +16,14 @@ import * as yup from 'yup';
 import { axiosInstance } from 'services';
 import { useNavigate } from 'react-router';
 
-// ===============================|| UI COLOR ||=============================== //
+// ===============================|| RegisterUser ||=============================== //
 
 const yupValidateShchema = yup.object().shape({
     client_name: yup.string('*Enter string').required("*Can't be empty").min(2, '*Enter more than 2 characters'),
     phone_number: yup.string('*Enter string').required("*Can't be empty").min(2, '*Enter maore than 2 characters'),
 });
 
-const UIColor = () => {
+const RegisterUser = () => {
     const navigate = useNavigate();
 
     const handleSubmit = ({ client_name: name, phone_number: phone }) => {
@@ -100,4 +100,4 @@ const UIColor = () => {
     );
 };
 
-export default UIColor;
+export default RegisterUser;

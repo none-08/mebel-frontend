@@ -1,5 +1,6 @@
 import {
     Alert,
+    Box,
     Button,
     Card,
     CardContent,
@@ -31,6 +32,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ReplyRoundedIcon from '@mui/icons-material/ReplyRounded';
 import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
 import { IconTruckDelivery } from '@tabler/icons';
+import { IconReceiptRefund } from '@tabler/icons';
+import { IconBrandTelegram } from '@tabler/icons';
 
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
@@ -38,6 +41,7 @@ import { Link } from 'react-router-dom';
 import { getDate } from 'hooks';
 import { AlertUser, RouteBtn } from 'custom-components';
 import { LoadingButton } from '@mui/lab';
+import axios from 'axios';
 
 const InvoiceDetail = () => {
     const dispatch = useDispatch();
@@ -45,78 +49,169 @@ const InvoiceDetail = () => {
     const { id } = useParams();
     const theme = useTheme();
 
-    const [isLoading, setLoading] = useState(false);
-    const [isDeleting, setDeleting] = useState(false);
+    const [isLoading, setLoading] = useState({ open: false, message: '', for: 'loading' });
     const [currentInvocie, setInvoice] = useState(null);
-    const [isSnackbarOpened, setSnackbarOpen] = useState(false);
+    const [currentInvocieOrders, setInvoiceOrders] = useState(null);
     const [statusSnackbar, setStatusSnack] = useState({ open: false, message: '', type: 'error' });
+    const [confirmSend, setConfirmSend] = useState({ open: false, message: '', type: 'action' });
 
     useEffect(() => {
-        setLoading(true);
+        handleSnackLoadingOpen();
         (async () => {
             try {
-                const data = await axiosInstance.get(`/${id}`);
-                setInvoice(data.data.data);
-                !data || setStatusSnack({ open: false });
-                console.log(data.data.data);
+                const invoiceData = await axiosInstance.get(`/${id}`);
+                const ordersData = await axiosInstance.get(`/${id}/orders`);
+                setInvoice(invoiceData.data.data);
+                setInvoiceOrders(ordersData.data.data);
+                console.log(ordersData.data.data);
+                !invoiceData && handleSnackStatusClose();
             } catch (err) {
+                console.log(err);
                 handleSnackStatusOpen(err.message, 'error');
             } finally {
-                setLoading(false);
+                handleSnackLoadingClose();
             }
         })();
     }, []);
 
-    const handleSnackBtnOpen = () => {
-        setSnackbarOpen(true);
+    const handleOrderRowClick = (invoiceID, rowIndex, rowID) => {
+        navigate(`/utils/util-invoices/${invoiceID}/mark-paid/${rowIndex}&${rowID}`);
     };
 
-    const handleSnackClose = (event, reason) => {
-        console.log(event);
-        // if (reason === 'clickaway') {
-        // }
-        setSnackbarOpen(false);
-    };
+    // Delete user with orders
 
-    const handleInvoiceDelete = () => {
-        setDeleting(true);
-        (async () => {
-            try {
-                await axiosInstance.delete(`/${id}`);
-                navigate('/utils/util-invoices');
-            } catch (err) {
-                handleSnackStatusOpen(err.message, 'error');
-            } finally {
-                setDeleting(false);
-                setSnackbarOpen(false);
-            }
-        })();
-    };
+    // const [isDeleting, setDeleting] = useState(false);
+    // const [isDeleteSnackbarOpened, setDeleteSnackbarOpen] = useState(false);
+    // const handleInvoiceDelete = () => {
+    //     setDeleting(true);
+    //     (async () => {
+    //         try {
+    //             await axiosInstance.delete(`/${id}`);
+    //             navigate('/utils/util-invoices');
+    //         } catch (err) {
+    //             handleSnackStatusOpen(err.message, 'error');
+    //         } finally {
+    //             setDeleting(false);
+    //             setDeleteSnackbarOpen(false);
+    //         }
+    //     })();
+    // };
+    // Delete Snackbar content
+    // const snackbarContent = (
+    //     <>
+    //         <Button color="secondary" size="small" onClick={handleDeleteSnackClose}>
+    //             UNDO
+    //         </Button>
+    //         <LoadingButton
+    //             loading={isDeleting}
+    //             onClick={handleInvoiceDelete}
+    //             size="small"
+    //             aria-label="close"
+    //             color="inherit"
+    //             startIcon={<DeleteIcon />}
+    //         />
+    //     </>
+    // );
+    // const handleDeleteSnackOpen = () => {
+    //     setDeleteSnackbarOpen(true);
+    // };
+    // const handleDeleteSnackClose = (event, reason) => {
+    //     setDeleteSnackbarOpen(false);
+    // };
+    // <Snackbar open={isDeleteSnackbarOpened} onClose={handleDeleteSnackClose} message="Do you want to delete Invoice" action={snackbarContent} />
+
+    // Delete Button
+    // {currentInvocie ? (
+    //     <Button
+    //         onClick={handleDeleteSnackOpen}
+    //         variant="contained"
+    //         color="error"
+    //         startIcon={<DeleteIcon />}
+    //     >
+    //         Delete
+    //     </Button>
+    // ) : (
+    //     <Skeleton
+    //         sx={{ bgcolor: 'grrey.900' }}
+    //         variant="contained"
+    //         animation="wave"
+    //         width={90}
+    //         height={36}
+    //     />
+    // )}
 
     // Status Snackbar
     const handleSnackStatusClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-        setStatusSnack(false);
+        setStatusSnack({ open: false });
     };
     const handleSnackStatusOpen = (message = '', type = 'error') => {
         setStatusSnack({ open: true, message: message, type: type });
     };
 
-    // Snackbar content
-    const snackbarContent = (
+    // Loading Snackbar
+
+    const handleSnackLoadingClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setLoading({ open: false, message: '', for: 'loading' });
+    };
+    const handleSnackLoadingOpen = () => {
+        setLoading({ open: true, message: '', for: 'loading' });
+    };
+
+    const handleSendInvoicesBtn = () => {
+        const orders = String(
+            `  Assalomu alaykum ${currentInvocie?.name}! Sizga shuni 
+            xabar bermoqchimizki singing "Muborak Elegant Mebel" korxonasidan 
+            ayni vaqtda barcha buyutmangiz jami $${currentInvocie?.total_debt} ga yetgan ! 
+            Yaniy : ${currentInvocie?.orders.map(({ product_name, price, remainder_amount, debt }, index) => {
+                return `${index + 1}) $${price} lik '${product_name}'dan - ${remainder_amount}ta ___ jami$${debt} `;
+            })}. Shikoyat yoki Maslahat uchun ++998977646890 raqami siz uchun doim xozir ;)`
+        );
+        const chatID = '874523678';
+        const token = '5828280243:AAGe_0ItcammTVlDXdWojxwckwdpkJLpMR0';
+        const URL_Telegram = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatID}&text=${orders}`;
+
+        (async () => {
+            handleSnackLoadingOpen();
+            try {
+                await axios.post(URL_Telegram);
+            } catch (err) {
+                handleSnackStatusOpen(err.message, 'error');
+            } finally {
+                handleConfirmSendClose();
+                handleSnackLoadingClose();
+            }
+        })();
+    };
+
+    // Confirm Sending Invoice Snackbar
+    const handleConfirmSendClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setConfirmSend({ open: false });
+    };
+    const handleConfirmSendOpen = () => {
+        setConfirmSend({ open: true, message: 'Do you want send current invoice?', type: 'action' });
+    };
+
+    const sendSnackContent = (
         <>
-            <Button color="secondary" size="small" onClick={handleSnackClose}>
+            <Button color="secondary" size="small" onClick={handleConfirmSendClose}>
                 UNDO
             </Button>
             <LoadingButton
-                loading={isDeleting}
-                onClick={handleInvoiceDelete}
+                loading={isLoading?.open}
+                onClick={handleSendInvoicesBtn}
                 size="small"
                 aria-label="close"
                 color="inherit"
-                startIcon={<DeleteIcon />}
+                startIcon={<IconBrandTelegram />}
             />
         </>
     );
@@ -124,8 +219,10 @@ const InvoiceDetail = () => {
     return (
         <>
             {/* Snackbars */}
-            <Snackbar open={isSnackbarOpened} onClose={handleSnackClose} message="Do you want to delete Invoice" action={snackbarContent} />
+
             <AlertUser alertInfo={statusSnackbar} onClose={handleSnackStatusClose} />
+            <AlertUser onClose={handleSnackLoadingClose} loading={isLoading} />
+            <AlertUser alertInfo={confirmSend} onClose={handleConfirmSendClose} action={sendSnackContent} />
 
             <MainCard title="Manage orders" secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}>
                 <Grid
@@ -146,15 +243,9 @@ const InvoiceDetail = () => {
                             <CardContent>
                                 <Grid container justifyContent="space-between" alignItems="center">
                                     <Grid item>
-                                        <Grid item>
-                                            <RouteBtn
-                                                to="/utils/util-invoices/"
-                                                variant="text"
-                                                startIcon={<KeyboardArrowLeftRoundedIcon />}
-                                            >
-                                                Go back
-                                            </RouteBtn>
-                                        </Grid>
+                                        <RouteBtn to="/utils/util-invoices/" variant="text" startIcon={<KeyboardArrowLeftRoundedIcon />}>
+                                            Go back
+                                        </RouteBtn>
                                     </Grid>
                                     <Grid
                                         item
@@ -164,35 +255,34 @@ const InvoiceDetail = () => {
                                             gap: 1,
                                         }}
                                     >
-                                        <Grid item>
-                                            {currentInvocie ? (
-                                                <RouteBtn
-                                                    to={`/utils/util-invoices/${id}/order`}
-                                                    variant="contained"
-                                                    color="primary"
-                                                    startIcon={<IconTruckDelivery />}
-                                                >
-                                                    Add order
-                                                </RouteBtn>
-                                            ) : (
-                                                <Skeleton
-                                                    sx={{ bgcolor: 'grrey.900' }}
-                                                    variant="contained"
-                                                    animation="wave"
-                                                    width={85}
-                                                    height={36}
-                                                />
-                                            )}
-                                        </Grid>
+                                        {currentInvocie ? (
+                                            <RouteBtn
+                                                to={`/utils/util-invoices/${id}/add-order`}
+                                                variant="contained"
+                                                color="primary"
+                                                startIcon={<IconTruckDelivery />}
+                                            >
+                                                Add order
+                                            </RouteBtn>
+                                        ) : (
+                                            <Skeleton
+                                                sx={{ bgcolor: 'grrey.900' }}
+                                                variant="contained"
+                                                animation="wave"
+                                                width={85}
+                                                height={36}
+                                            />
+                                        )}
+
                                         <Grid item>
                                             {currentInvocie ? (
                                                 <RouteBtn
                                                     to={`/utils/util-invoices/${id}/edit`}
                                                     variant="contained"
-                                                    color="primary"
-                                                    startIcon={<ModeEditRoundedIcon />}
+                                                    color="success"
+                                                    startIcon={<IconReceiptRefund />}
                                                 >
-                                                    Edit
+                                                    Mark as paid
                                                 </RouteBtn>
                                             ) : (
                                                 <Skeleton
@@ -204,29 +294,15 @@ const InvoiceDetail = () => {
                                                 />
                                             )}
                                         </Grid>
+
                                         <Grid item>
                                             {currentInvocie ? (
                                                 <Button
-                                                    onClick={handleSnackBtnOpen}
+                                                    onClick={handleConfirmSendOpen}
                                                     variant="contained"
-                                                    color="error"
-                                                    startIcon={<DeleteIcon />}
+                                                    color="info"
+                                                    startIcon={<ReplyRoundedIcon />}
                                                 >
-                                                    Delete
-                                                </Button>
-                                            ) : (
-                                                <Skeleton
-                                                    sx={{ bgcolor: 'grrey.900' }}
-                                                    variant="contained"
-                                                    animation="wave"
-                                                    width={90}
-                                                    height={36}
-                                                />
-                                            )}
-                                        </Grid>
-                                        <Grid item>
-                                            {currentInvocie ? (
-                                                <Button variant="contained" color="info" startIcon={<ReplyRoundedIcon />}>
                                                     Send invoice
                                                 </Button>
                                             ) : (
@@ -256,17 +332,10 @@ const InvoiceDetail = () => {
                                 <CardContent>
                                     <Grid container spacing={2} direction="column">
                                         <Grid item>
-                                            <Stack spacing={2} direction="row" alignItems="center">
+                                            <Stack spacing={2} direction="row" alignItems="baseline">
                                                 <Grid container spacing={1} direction="column">
                                                     <Grid item>
-                                                        <Typography
-                                                            component="span"
-                                                            sx={{
-                                                                fontSize: '0.7rem',
-                                                                fontWeight: 400,
-                                                                color: '#7E88C3',
-                                                            }}
-                                                        >
+                                                        <Typography component="span" variant="body2">
                                                             Customer ID
                                                         </Typography>
                                                     </Grid>
@@ -296,14 +365,7 @@ const InvoiceDetail = () => {
                                                 </Grid>
                                                 <Grid container spacing={1} direction="column">
                                                     <Grid item>
-                                                        <Typography
-                                                            component="span"
-                                                            sx={{
-                                                                fontSize: '0.7rem',
-                                                                fontWeight: 400,
-                                                                color: '#7E88C3',
-                                                            }}
-                                                        >
+                                                        <Typography component="span" variant="body2">
                                                             Customer Name
                                                         </Typography>
                                                         <Typography
@@ -323,27 +385,19 @@ const InvoiceDetail = () => {
                                             </Stack>
                                         </Grid>
                                         <Grid item>
-                                            <Stack spacing={2} direction="row" alignItems="center">
+                                            <Stack spacing={2} direction="row" alignItems="baseline">
                                                 <Grid item container spacing={1} direction="column">
                                                     <Grid item>
-                                                        <Typography
-                                                            component="span"
-                                                            sx={{
-                                                                fontSize: '0.7rem',
-                                                                fontWeight: 400,
-                                                                color: '#7E88C3',
-                                                            }}
-                                                        >
+                                                        <Typography component="span" variant="body2">
                                                             Invoice Date
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
                                                         <Typography
                                                             component="span"
+                                                            variant="subtitle1"
                                                             sx={{
-                                                                fontSize: '1.5rem',
-                                                                fontWeight: 500,
-                                                                color: theme.palette.dark[800],
+                                                                fontSize: '20px',
                                                             }}
                                                         >
                                                             {new Date(currentInvocie?.created_at).toDateString()}
@@ -352,24 +406,16 @@ const InvoiceDetail = () => {
                                                 </Grid>
                                                 <Grid item container spacing={1} direction="column">
                                                     <Grid item>
-                                                        <Typography
-                                                            component="span"
-                                                            sx={{
-                                                                fontSize: '0.7rem',
-                                                                fontWeight: 400,
-                                                                color: '#7E88C3',
-                                                            }}
-                                                        >
+                                                        <Typography component="span" variant="body2">
                                                             Sent to
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
                                                         <Typography
                                                             component="span"
+                                                            variant="subtitle1"
                                                             sx={{
-                                                                fontSize: '1.5rem',
-                                                                fontWeight: 500,
-                                                                color: theme.palette.dark[800],
+                                                                fontSize: '20px',
                                                             }}
                                                         >
                                                             {currentInvocie?.phone}
@@ -399,26 +445,41 @@ const InvoiceDetail = () => {
                                                                         <TableCell align="right">Remained</TableCell>
                                                                         <TableCell align="right">Returned</TableCell>
                                                                         <TableCell align="right">Debt</TableCell>
+                                                                        <TableCell align="right">Pay</TableCell>
                                                                     </TableRow>
                                                                 </TableHead>
                                                                 <TableBody>
-                                                                    {currentInvocie?.orders?.map((order) => (
+                                                                    {currentInvocieOrders?.map((order, index) => (
                                                                         <TableRow
+                                                                            key={order?.id}
+                                                                            onClick={() =>
+                                                                                handleOrderRowClick(currentInvocie?.id, index, order?.id)
+                                                                            }
                                                                             hover
-                                                                            key={order.id}
                                                                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                                                         >
                                                                             <TableCell component="th" scope="row">
                                                                                 {order.product_name}
                                                                             </TableCell>
                                                                             <TableCell align="right">
-                                                                                {getDate(order?.ordered_at)}
+                                                                                {getDate(order?.updated_at)}
                                                                             </TableCell>
-                                                                            <TableCell align="right">{order.price}</TableCell>
+                                                                            <TableCell align="right">${order.price}</TableCell>
                                                                             <TableCell align="right">{order.sold_amount}</TableCell>
                                                                             <TableCell align="right">{order.remainder_amount}</TableCell>
                                                                             <TableCell align="right">{order.returned_amount}</TableCell>
-                                                                            <TableCell align="right">{order.debt}</TableCell>
+                                                                            <TableCell align="right">${order.debt}</TableCell>
+                                                                            <TableCell
+                                                                                align="right"
+                                                                                sx={{
+                                                                                    '&:hover > svg': {
+                                                                                        fill: '#F9FAFE',
+                                                                                        color: '#5e35b1',
+                                                                                    },
+                                                                                }}
+                                                                            >
+                                                                                <IconReceiptRefund />
+                                                                            </TableCell>
                                                                         </TableRow>
                                                                     ))}
                                                                 </TableBody>
@@ -478,7 +539,12 @@ const InvoiceDetail = () => {
                                 }}
                             >
                                 <CardContent>
-                                    <Skeleton sx={{ display: 'block', height: 200 }} animation="wave" variant="rounded" />
+                                    <Skeleton component="p" height={30} animation="wave" variant="rounded" />
+                                    <Box width="100%" height="10px" />
+                                    <Skeleton component="p" height={30} animation="wave" variant="rounded" />
+                                    <Box width="100%" height="30px" />
+
+                                    <Skeleton sx={{ display: 'block', height: 100 }} animation="wave" variant="rounded" />
                                 </CardContent>
                             </Card>
                         )}

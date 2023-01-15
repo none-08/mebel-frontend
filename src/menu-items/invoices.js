@@ -11,9 +11,9 @@ const icons = {
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
 
-const utilities = {
-    id: 'utilities',
-    title: 'Utilities',
+const invoices = {
+    id: 'invoices',
+    title: 'Invoices',
     type: 'group',
     children: [
         {
@@ -43,4 +43,4 @@ const utilities = {
     ],
 };
 
-export default utilities;
+export default invoices;

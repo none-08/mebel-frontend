@@ -1,6 +1,20 @@
 export default function componentStyleOverrides(theme) {
     const bgColor = theme.colors?.grey50;
     return {
+        // MuiSelect: {
+        //     styleOverrides: {
+        //         root: {
+        //             borderRadius: `${theme?.customization?.borderRadius}px`,
+        //         },
+        //     },
+        // },
+        iSelect: {
+            styleOverrides: {
+                root: {
+                    borderRadius: `${theme?.customization?.borderRadius}px`,
+                },
+            },
+        },
         MuiButton: {
             styleOverrides: {
                 root: {

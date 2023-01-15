@@ -13,7 +13,7 @@ import * as yup from 'yup';
 
 // ============================|| UTILITIES SHADOW ||============================ //
 
-const UtilitiesShadow = () => {
+const RegisterProduct = () => {
     const selectOptions = [
         {
             value: '',
@@ -110,4 +110,4 @@ const UtilitiesShadow = () => {
     );
 };
 
-export default UtilitiesShadow;
+export default RegisterProduct;

@@ -8,15 +8,15 @@ import Loadable from 'ui-component/Loadable';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
 // utilities routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/invoices/Typography')));
-const UtilsInvocieDetail = Loadable(lazy(() => import('views/utilities/invoices/Invoice-detail')));
-const UtilsInvocieEdit = Loadable(lazy(() => import('views/utilities/invoices/Invoice-edit')));
+const Invoices = Loadable(lazy(() => import('views/invoices/invoices/Invoices')));
+const InvoiceDetail = Loadable(lazy(() => import('views/invoices/invoices/Invoice-detail')));
+const InvoiceEdit = Loadable(lazy(() => import('views/invoices/invoices/Invoice-edit')));
 
-const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
+const RegisterUser = Loadable(lazy(() => import('views/invoices/RegisterUser')));
+const RegisterProduct = Loadable(lazy(() => import('views/invoices/RegisterProduct')));
 
 // sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const MarkPaid = Loadable(lazy(() => import('views/mark-paid/index')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -45,18 +45,22 @@ const MainRoutes = {
                     children: [
                         {
                             path: '',
-                            element: <UtilsTypography />,
+                            element: <Invoices />,
                         },
                         {
                             path: ':id',
                             children: [
                                 {
                                     path: '',
-                                    element: <UtilsInvocieDetail />,
+                                    element: <InvoiceDetail />,
+                                },
+                                {
+                                    path: 'mark-paid/:item',
+                                    element: <MarkPaid />,
                                 },
                                 {
                                     path: 'edit',
-                                    element: <UtilsInvocieEdit />,
+                                    element: <InvoiceEdit />,
                                 },
                             ],
                         },
@@ -69,18 +73,13 @@ const MainRoutes = {
             children: [
                 {
                     path: 'register/user',
-                    element: <UtilsColor />,
+                    element: <RegisterUser />,
                 },
                 {
                     path: 'register/product',
-                    element: <UtilsShadow />,
+                    element: <RegisterProduct />,
                 },
             ],
-        },
-
-        {
-            path: 'sample-page',
-            element: <SamplePage />,
         },
     ],
 };
