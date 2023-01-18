@@ -2,12 +2,19 @@
 import {
     Avatar,
     Box,
+    Button,
     Card,
     CardContent,
     CardMedia,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     Grid,
     Paper,
     Skeleton,
+    Snackbar,
     Stack,
     Table,
     TableBody,
@@ -19,7 +26,7 @@ import {
 } from '@mui/material';
 import { AlertUser, FormikInput, Input, RouteBtn } from 'custom-components';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { axiosInstance } from 'services';
 import * as yup from 'yup';
 
@@ -28,91 +35,77 @@ import MainCard from 'ui-component/cards/MainCard';
 import SubCard from 'ui-component/cards/SubCard';
 
 // Icons
-import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
-import { Form, Formik } from 'formik';
+import { Form, Formik, useFormikContext } from 'formik';
 import { getDate } from 'hooks';
+import { IconReceiptOff, IconChevronLeft, IconCalculator, IconTrash } from '@tabler/icons';
+import { LoadingButton } from '@mui/lab';
 
 // ==============================|| Mark paid orders ||============================== //
 
 const MarkPaid = () => {
-    const { id, item } = useParams();
-    const [currentInvoice, setCurrentInvoice] = useState(null);
-    const [currentInvocieOrders, setCurrentInvoiceOrders] = useState(null);
+    const navigate = useNavigate();
+    const { id, orderID } = useParams();
     const [isLoading, setLoading] = useState({ open: false, message: '', for: 'loading' });
     const [statusSnackbar, setStatusSnack] = useState({ open: false, message: '', type: 'error' });
-    const [countProduct, setCountProduct] = useState(null);
+    const [isDialogOpen, setDialogOpen] = useState(false);
+    const [editingOrder, setEditingOrder] = useState(null);
+    const [calculateOrder, setCalculate] = useState(null);
+    const [isDeleting, setDeleting] = useState(false);
+    const [isDeleteSnackbarOpened, setDeleteSnackbarOpen] = useState(false);
 
-    const productPath = item.split('&');
     useEffect(() => {
         handleSnackLoadingOpen();
         (async () => {
             try {
-                const currentInvoiceData = await axiosInstance.get(id);
-                const currentInvocieOrdersData = await axiosInstance.get(`${id}/orders`);
-                setCurrentInvoice(currentInvoiceData.data.data);
-                setCurrentInvoiceOrders(currentInvocieOrdersData.data.data);
+                const currentUsersOrder = await axiosInstance.get(`users/${id}/orders/${orderID}`);
+                setEditingOrder(currentUsersOrder.data.data);
+                setCalculate(currentUsersOrder.data.data);
             } catch (err) {
-                handleSnackStatusOpen(err.message, 'error');
+                handleSnackStatusOpen(err.message);
             } finally {
                 handleSnackLoadingClose();
             }
         })();
     }, []);
-    if (currentInvocieOrders && !countProduct) {
-        const {
-            debt: invoiceDebt,
-            price: invoicePrice,
-            sold_amount: invoiceSold_amount,
-            remainder_amount: invoiceRemainder_amount,
-            returned_amount: invoiceReturned_amount,
-        } = currentInvocieOrders?.[productPath[0]];
-        setCountProduct({
-            price: invoicePrice,
-            sold: invoiceSold_amount,
-            debt: invoiceDebt,
-            remained: invoiceRemainder_amount,
-            returned: invoiceReturned_amount,
-        });
-    }
 
     const yupValidateShchema = yup.object().shape({
-        amount: yup
+        sold: yup
             .number()
             .typeError('*Enter number!')
-            .positive('*Enter positive number')
+            .required("*Can't be empty")
+            .moreThan(-1, '*Enter positive number')
             .integer('*Enter integer')
-            .lessThan(
-                currentInvocieOrders?.[productPath[0]]?.remainder_amount + 1,
-                `${currentInvocieOrders?.[productPath[0]]?.remainder_amount} is maximum amount`
-            ),
+            .lessThan(+editingOrder?.remainder_amount + 1, `${editingOrder?.remainder_amount} is maximum amount`),
+        returned: yup
+            .number()
+            .typeError('*Enter number!')
+            .moreThan(-1, '*Enter positive number')
+            .integer('*Enter integer')
+            .lessThan(+editingOrder?.remainder_amount + 1, `${editingOrder?.remainder_amount} is maximum amount`),
+        description: yup.string().typeError('*Enter text!').min(3, '*More than 3 characters').max(30, '*Less than 30 characters'),
     });
 
-    const handleSubmit = (evt) => {
-        console.log(evt);
-    };
-
-    const handleInputChange = (evt) => {
-        const countedDebt =
-            (currentInvocieOrders?.[productPath[0]]?.remainder_amount - +evt.target.value) * currentInvocieOrders?.[productPath[0]]?.price;
-        setCountProduct({
-            price: currentInvocieOrders?.[productPath[0]]?.price,
-            sold: currentInvocieOrders?.[productPath[0]]?.sold_amount + +evt.target.value,
-            remained: currentInvocieOrders?.[productPath[0]]?.remainder_amount - +evt.target.value,
-            returned: currentInvocieOrders?.[productPath[0]]?.returned_amount,
-            debt: countedDebt,
-        });
-    };
-    const handleKeyPress = (evt) => {
-        console.log(evt.keyCode);
-        if (evt.keyCode >= 32 && evt.keyCode <= 42) {
-            evt.preventDefault();
-        } else if (evt.keyCode >= 65 && evt.keyCode <= 90) {
-            evt.preventDefault();
-        } else if (evt.keyCode >= 105 && evt.keyCode <= 222) {
-            evt.preventDefault();
-        } else if (+(evt.target.value + evt.key) > +currentInvocieOrders?.[productPath[0]]?.remainder_amount) {
-            evt.preventDefault();
+    const handleOrdersCount = ({ sold, returned, description }) => {
+        if (editingOrder?.remainder_amount < +sold + +returned) {
+            handleSnackStatusOpen(
+                +editingOrder?.remainder_amount - +sold > 0
+                    ? `Sold and Returned orders should't go beyond ${+editingOrder?.remainder_amount}`
+                    : 'You entered wrong value',
+                'error'
+            );
+            return;
         }
+        console.log(sold);
+        const countedDebt = (editingOrder?.remainder_amount - (+sold + +returned)) * editingOrder?.price;
+        setCalculate({
+            ...editingOrder,
+            price: editingOrder?.price,
+            sold_amount: editingOrder?.sold_amount + +sold,
+            remainder_amount: editingOrder?.remainder_amount - (+sold + +returned),
+            returned_amount: editingOrder?.returned_amount + +returned,
+            debt: countedDebt,
+            description: description,
+        });
     };
 
     // Status Snackbar
@@ -138,15 +131,139 @@ const MarkPaid = () => {
         setLoading({ open: true, message: '', for: 'loading' });
     };
 
+    // Order Dialog funcs
+    const handleDialogOpen = () => {
+        setDialogOpen(true);
+    };
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
+
+    const handleDialogSubmit = (evt) => {
+        handleSnackLoadingOpen();
+        (async () => {
+            try {
+                await axiosInstance.put(`orders/${orderID}`, calculateOrder);
+                navigate(-1);
+            } catch (err) {
+                handleSnackStatusOpen(err.message);
+            } finally {
+                handleSnackLoadingClose();
+            }
+        })();
+    };
+
+    // Delete Snackbar
+    const handleDeleteSnackOpen = () => {
+        setDeleteSnackbarOpen(true);
+    };
+    const handleDeleteSnackClose = (event, reason) => {
+        setDeleteSnackbarOpen(false);
+    };
+    // Delete order
+    const handleInvoiceDelete = () => {
+        handleSnackLoadingOpen();
+        (async () => {
+            try {
+                await axiosInstance.delete(`orders/${orderID}`);
+                navigate(-1);
+            } catch (err) {
+                handleSnackStatusOpen(err.message);
+            } finally {
+                handleSnackLoadingClose();
+            }
+        })();
+    };
+
+    const snackbarContent = (
+        <>
+            <Button color="secondary" size="small" onClick={handleDeleteSnackClose}>
+                UNDO
+            </Button>
+            <LoadingButton
+                loading={isDeleting}
+                onClick={handleInvoiceDelete}
+                size="small"
+                aria-label="close"
+                color="inherit"
+                startIcon={<IconTrash />}
+            />
+        </>
+    );
+
     return (
         <>
             <AlertUser alertInfo={statusSnackbar} onClose={handleSnackStatusClose} />
             <AlertUser onClose={handleSnackLoadingClose} loading={isLoading} />
+            <Snackbar
+                open={isDeleteSnackbarOpened}
+                onClose={handleDeleteSnackClose}
+                message="Do you want to delete Invoice"
+                action={snackbarContent}
+            />
+
+            <Dialog open={isDialogOpen} keepMounted onClose={handleDialogClose} aria-describedby="alert-dialog-slide-description">
+                <DialogContent>
+                    <Card>
+                        <CardContent>
+                            <Grid container spacing={1} direction="column" minWidth="30vw">
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Product name:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">{calculateOrder?.product_name}</Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Ordered date:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">{getDate(calculateOrder?.created_at)}</Typography>
+                                    </Grid>
+                                </Grid>
+
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Price:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">${calculateOrder?.price}</Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Returned:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">{calculateOrder?.returned_amount}</Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Remained:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">{calculateOrder?.remainder_amount}</Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Sold:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">{calculateOrder?.sold_amount}</Typography>
+                                    </Grid>
+                                </Grid>
+                                <Grid item container direction="row" justifyContent="space-between">
+                                    <Grid item>Current debt:</Grid>
+                                    <Grid item>
+                                        <Typography variant="h4">${calculateOrder?.debt}</Typography>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Close</Button>
+                    <Button onClick={handleDialogSubmit}>Pay</Button>
+                </DialogActions>
+            </Dialog>
 
             <MainCard
                 title={
-                    currentInvocieOrders ? (
-                        <Typography variant="h3">Pay for "{currentInvocieOrders?.[productPath[0]]?.product_name}"</Typography>
+                    editingOrder ? (
+                        <Typography variant="h3">Pay for "{editingOrder?.product_name}"</Typography>
                     ) : (
                         <Skeleton variant="text" component="h4" animation="wave" width="50%" />
                     )
@@ -164,13 +281,29 @@ const MarkPaid = () => {
                             <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                 <Grid container justifyContent="space-between" alignItems="center">
                                     <Grid item>
-                                        <RouteBtn
-                                            to={`/utils/util-invoices/${id}`}
-                                            variant="text"
-                                            startIcon={<KeyboardArrowLeftRoundedIcon />}
-                                        >
+                                        <RouteBtn to={'goBack'} variant="text" startIcon={<IconChevronLeft />}>
                                             Go back
                                         </RouteBtn>
+                                    </Grid>
+                                    <Grid item>
+                                        {editingOrder ? (
+                                            <Button
+                                                onClick={handleDeleteSnackOpen}
+                                                variant="contained"
+                                                color="error"
+                                                startIcon={<IconTrash />}
+                                            >
+                                                Delete
+                                            </Button>
+                                        ) : (
+                                            <Skeleton
+                                                sx={{ bgcolor: 'grrey.900' }}
+                                                variant="contained"
+                                                animation="wave"
+                                                width={90}
+                                                height={36}
+                                            />
+                                        )}
                                     </Grid>
                                 </Grid>
                             </CardContent>
@@ -210,32 +343,47 @@ const MarkPaid = () => {
                                                             </TableRow>
                                                         </TableHead>
                                                         <TableBody>
-                                                            <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                                <TableCell component="th" scope="row">
-                                                                    {currentInvocieOrders?.[productPath[0]].product_name}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    {getDate(currentInvocieOrders?.[productPath[0]].created_at)}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    {getDate(currentInvocieOrders?.[productPath[0]].updated_at)}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    ${currentInvocieOrders?.[productPath[0]].price}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    {currentInvocieOrders?.[productPath[0]].remainder_amount}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    {currentInvocieOrders?.[productPath[0]].sold_amount}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    {currentInvocieOrders?.[productPath[0]].returned_amount}
-                                                                </TableCell>
-                                                                <TableCell align="right">
-                                                                    ${currentInvocieOrders?.[productPath[0]].debt}
-                                                                </TableCell>
-                                                            </TableRow>
+                                                            {editingOrder ? (
+                                                                <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                                    <TableCell component="th" scope="row">
+                                                                        {editingOrder?.product_name}
+                                                                    </TableCell>
+                                                                    <TableCell align="right">{getDate(editingOrder?.created_at)}</TableCell>
+                                                                    <TableCell align="right">{getDate(editingOrder?.updated_at)}</TableCell>
+                                                                    <TableCell align="right">${editingOrder?.price}</TableCell>
+                                                                    <TableCell align="right">{editingOrder?.remainder_amount}</TableCell>
+                                                                    <TableCell align="right">{editingOrder?.sold_amount}</TableCell>
+                                                                    <TableCell align="right">{editingOrder?.returned_amount}</TableCell>
+                                                                    <TableCell align="right">${editingOrder?.debt}</TableCell>
+                                                                </TableRow>
+                                                            ) : (
+                                                                <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                                    <TableCell component="th" scope="row">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            )}
                                                         </TableBody>
                                                     </Table>
                                                 </TableContainer>
@@ -251,10 +399,12 @@ const MarkPaid = () => {
                                             <CardContent>
                                                 <Formik
                                                     initialValues={{
-                                                        amount: '',
+                                                        sold: '0',
+                                                        returned: '0',
+                                                        description: '',
                                                     }}
                                                     validationSchema={yupValidateShchema}
-                                                    onSubmit={handleSubmit}
+                                                    onSubmit={handleOrdersCount}
                                                     validateOnChange
                                                 >
                                                     <Form>
@@ -263,21 +413,46 @@ const MarkPaid = () => {
                                                                 <Typography>Sold products amount</Typography>
                                                                 <FormikInput
                                                                     inputProps={{ autoComplete: 'off' }}
-                                                                    onKeyDown={handleKeyPress}
-                                                                    onChange={handleInputChange}
-                                                                    name="amount"
+                                                                    name="sold"
                                                                     inputText="Enter product amount"
                                                                 />
                                                             </Grid>
                                                             <Grid item>
                                                                 <Typography>Returned products amount</Typography>
                                                                 <FormikInput
-                                                                    onKeyDown={handleKeyPress}
                                                                     inputProps={{ autoComplete: 'off' }}
-                                                                    onChange={handleInputChange}
                                                                     name="returned"
                                                                     inputText="Enter product amount"
                                                                 />
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <Typography>Order description</Typography>
+                                                                <FormikInput name="description" inputText="Description" />
+                                                            </Grid>
+                                                            <Grid
+                                                                item
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'space-between',
+                                                                }}
+                                                            >
+                                                                <Button
+                                                                    type="submit"
+                                                                    variant="contained"
+                                                                    color="info"
+                                                                    startIcon={<IconCalculator />}
+                                                                >
+                                                                    Count
+                                                                </Button>
+                                                                <Button
+                                                                    onClick={handleDialogOpen}
+                                                                    variant="contained"
+                                                                    color="success"
+                                                                    startIcon={<IconReceiptOff />}
+                                                                >
+                                                                    Pay
+                                                                </Button>
                                                             </Grid>
                                                         </Grid>
                                                     </Form>
@@ -305,13 +480,33 @@ const MarkPaid = () => {
                                                             </TableRow>
                                                         </TableHead>
                                                         <TableBody>
-                                                            <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                                <TableCell align="right">${countProduct?.price}</TableCell>
-                                                                <TableCell align="right">{countProduct?.returned}</TableCell>
-                                                                <TableCell align="right">{countProduct?.sold}</TableCell>
-                                                                <TableCell align="right">{countProduct?.remained}</TableCell>
-                                                                <TableCell align="right">${countProduct?.debt}</TableCell>
-                                                            </TableRow>
+                                                            {calculateOrder ? (
+                                                                <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                                    <TableCell align="right">${calculateOrder?.price}</TableCell>
+                                                                    <TableCell align="right">{calculateOrder?.returned_amount}</TableCell>
+                                                                    <TableCell align="right">{calculateOrder?.sold_amount}</TableCell>
+                                                                    <TableCell align="right">{calculateOrder?.remainder_amount}</TableCell>
+                                                                    <TableCell align="right">${calculateOrder?.debt}</TableCell>
+                                                                </TableRow>
+                                                            ) : (
+                                                                <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                                    <TableCell component="th" scope="row">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Skeleton variant="span" animation="wave" />
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            )}
                                                         </TableBody>
                                                     </Table>
                                                 </TableContainer>

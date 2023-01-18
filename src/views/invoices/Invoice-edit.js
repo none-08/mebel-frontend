@@ -6,8 +6,7 @@ import { useParams } from 'react-router';
 import { axiosInstance } from 'services';
 import MainCard from 'ui-component/cards/MainCard';
 // icons
-import { IconWritingSign } from '@tabler/icons';
-import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
+import { IconWritingSign, IconChevronLeft } from '@tabler/icons';
 
 const InvoiceEdit = () => {
     const [isLoading, setLoading] = useState({ open: false, message: '', for: 'loading' });
@@ -19,11 +18,11 @@ const InvoiceEdit = () => {
         handleSnackLoadingOpen();
         (async () => {
             try {
-                const data = await axiosInstance.get(`/${id}`);
+                const data = await axiosInstance.get(`users/${id}`);
                 setEditingInvoice(data.data.data);
                 !data.data.data && handleSnackStatusClose;
             } catch (err) {
-                handleSnackStatusOpen(err.message, 'error');
+                handleSnackStatusOpen(err.message);
             } finally {
                 handleSnackLoadingClose();
             }
@@ -88,11 +87,7 @@ const InvoiceEdit = () => {
                                 <Grid container justifyContent="space-between" alignItems="center">
                                     <Grid item>
                                         <Grid item>
-                                            <RouteBtn
-                                                to={`/utils/util-invoices/${id}`}
-                                                variant="text"
-                                                startIcon={<KeyboardArrowLeftRoundedIcon />}
-                                            >
+                                            <RouteBtn to={'goBack'} variant="text" startIcon={<IconChevronLeft />}>
                                                 Go back
                                             </RouteBtn>
                                         </Grid>

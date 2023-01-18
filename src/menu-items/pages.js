@@ -1,39 +1,43 @@
 // assets
-import { IconKey } from '@tabler/icons';
+import { IconUsers, IconUserPlus, IconPencil } from '@tabler/icons';
 
 // constant
 const icons = {
-    IconKey,
+    IconUserPlus,
+    IconUsers,
+    IconPencil,
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
 
 const pages = {
     id: 'pages',
-    title: 'Register',
-    caption: 'Register order',
+    title: 'Client',
+    caption: 'Manage client',
     type: 'group',
     children: [
         {
-            id: 'redister',
-            title: 'Register',
+            id: 'client',
+            title: 'Client',
             type: 'collapse',
-            icon: icons.IconKey,
+            icon: icons.IconUsers,
             children: [
                 {
-                    id: 'user',
-                    title: 'User',
+                    id: 'register',
+                    title: 'Register',
                     type: 'item',
-                    url: '/pages/register/user',
+                    url: '/pages/client/register',
+                    icon: icons.IconUserPlus,
                     target: false,
                 },
-                // {
-                //     id: 'product',
-                //     title: 'Product',
-                //     type: 'item',
-                //     url: '/pages/register/product',
-                //     target: false,
-                // },
+                {
+                    id: 'product',
+                    title: 'Edit',
+                    type: 'item',
+                    url: '/pages/client/users',
+                    icon: icons.IconPencil,
+                    target: false,
+                },
             ],
         },
     ],

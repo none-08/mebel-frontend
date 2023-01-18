@@ -21,30 +21,19 @@ import {
 } from '@mui/material';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 import { axiosInstance } from 'services';
-import { gridSpacing } from 'store/constant';
 
 // icons
-import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReplyRoundedIcon from '@mui/icons-material/ReplyRounded';
-import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
-import { IconTruckDelivery } from '@tabler/icons';
-import { IconReceiptRefund } from '@tabler/icons';
-import { IconBrandTelegram } from '@tabler/icons';
-
+import { IconTruckDelivery, IconChevronLeft, IconTrash, IconReceiptRefund, IconBrandTelegram, IconPencil } from '@tabler/icons';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
-import { Link } from 'react-router-dom';
 import { getDate } from 'hooks';
 import { AlertUser, RouteBtn } from 'custom-components';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 
 const InvoiceDetail = () => {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id } = useParams();
     const theme = useTheme();
@@ -59,86 +48,24 @@ const InvoiceDetail = () => {
         handleSnackLoadingOpen();
         (async () => {
             try {
-                const invoiceData = await axiosInstance.get(`/${id}`);
-                const ordersData = await axiosInstance.get(`/${id}/orders`);
+                const invoiceData = await axiosInstance.get(`users/${id}`);
+                const ordersData = await axiosInstance.get(`users/${id}/orders`);
                 setInvoice(invoiceData.data.data);
                 setInvoiceOrders(ordersData.data.data);
                 console.log(ordersData.data.data);
-                !invoiceData && handleSnackStatusClose();
+                invoiceData && handleSnackStatusClose();
             } catch (err) {
                 console.log(err);
-                handleSnackStatusOpen(err.message, 'error');
+                handleSnackStatusOpen(err.message);
             } finally {
                 handleSnackLoadingClose();
             }
         })();
     }, []);
 
-    const handleOrderRowClick = (invoiceID, rowIndex, rowID) => {
-        navigate(`/utils/util-invoices/${invoiceID}/mark-paid/${rowIndex}&${rowID}`);
+    const handleOrderRowClick = (invoiceID, rowID) => {
+        navigate(`/invoices/clients-list/${invoiceID}/mark-paid/${rowID}`);
     };
-
-    // Delete user with orders
-
-    // const [isDeleting, setDeleting] = useState(false);
-    // const [isDeleteSnackbarOpened, setDeleteSnackbarOpen] = useState(false);
-    // const handleInvoiceDelete = () => {
-    //     setDeleting(true);
-    //     (async () => {
-    //         try {
-    //             await axiosInstance.delete(`/${id}`);
-    //             navigate('/utils/util-invoices');
-    //         } catch (err) {
-    //             handleSnackStatusOpen(err.message, 'error');
-    //         } finally {
-    //             setDeleting(false);
-    //             setDeleteSnackbarOpen(false);
-    //         }
-    //     })();
-    // };
-    // Delete Snackbar content
-    // const snackbarContent = (
-    //     <>
-    //         <Button color="secondary" size="small" onClick={handleDeleteSnackClose}>
-    //             UNDO
-    //         </Button>
-    //         <LoadingButton
-    //             loading={isDeleting}
-    //             onClick={handleInvoiceDelete}
-    //             size="small"
-    //             aria-label="close"
-    //             color="inherit"
-    //             startIcon={<DeleteIcon />}
-    //         />
-    //     </>
-    // );
-    // const handleDeleteSnackOpen = () => {
-    //     setDeleteSnackbarOpen(true);
-    // };
-    // const handleDeleteSnackClose = (event, reason) => {
-    //     setDeleteSnackbarOpen(false);
-    // };
-    // <Snackbar open={isDeleteSnackbarOpened} onClose={handleDeleteSnackClose} message="Do you want to delete Invoice" action={snackbarContent} />
-
-    // Delete Button
-    // {currentInvocie ? (
-    //     <Button
-    //         onClick={handleDeleteSnackOpen}
-    //         variant="contained"
-    //         color="error"
-    //         startIcon={<DeleteIcon />}
-    //     >
-    //         Delete
-    //     </Button>
-    // ) : (
-    //     <Skeleton
-    //         sx={{ bgcolor: 'grrey.900' }}
-    //         variant="contained"
-    //         animation="wave"
-    //         width={90}
-    //         height={36}
-    //     />
-    // )}
 
     // Status Snackbar
     const handleSnackStatusClose = (event, reason) => {
@@ -168,7 +95,7 @@ const InvoiceDetail = () => {
             `  Assalomu alaykum ${currentInvocie?.name}! Sizga shuni 
             xabar bermoqchimizki singing "Muborak Elegant Mebel" korxonasidan 
             ayni vaqtda barcha buyutmangiz jami $${currentInvocie?.total_debt} ga yetgan ! 
-            Yaniy : ${currentInvocie?.orders.map(({ product_name, price, remainder_amount, debt }, index) => {
+            Yaniy : ${currentInvocieOrders?.map(({ product_name, price, remainder_amount, debt }, index) => {
                 return `${index + 1}) $${price} lik '${product_name}'dan - ${remainder_amount}ta ___ jami$${debt} `;
             })}. Shikoyat yoki Maslahat uchun ++998977646890 raqami siz uchun doim xozir ;)`
         );
@@ -181,7 +108,7 @@ const InvoiceDetail = () => {
             try {
                 await axios.post(URL_Telegram);
             } catch (err) {
-                handleSnackStatusOpen(err.message, 'error');
+                handleSnackStatusOpen(err.message);
             } finally {
                 handleConfirmSendClose();
                 handleSnackLoadingClose();
@@ -243,7 +170,7 @@ const InvoiceDetail = () => {
                             <CardContent>
                                 <Grid container justifyContent="space-between" alignItems="center">
                                     <Grid item>
-                                        <RouteBtn to="/utils/util-invoices/" variant="text" startIcon={<KeyboardArrowLeftRoundedIcon />}>
+                                        <RouteBtn to={'goBack'} variant="text" startIcon={<IconChevronLeft />}>
                                             Go back
                                         </RouteBtn>
                                     </Grid>
@@ -257,7 +184,7 @@ const InvoiceDetail = () => {
                                     >
                                         {currentInvocie ? (
                                             <RouteBtn
-                                                to={`/utils/util-invoices/${id}/add-order`}
+                                                to={`/invoices/clients-list/${id}/add-order`}
                                                 variant="contained"
                                                 color="primary"
                                                 startIcon={<IconTruckDelivery />}
@@ -277,12 +204,12 @@ const InvoiceDetail = () => {
                                         <Grid item>
                                             {currentInvocie ? (
                                                 <RouteBtn
-                                                    to={`/utils/util-invoices/${id}/edit`}
+                                                    to={`/pages/client/users/${id}/edit`}
                                                     variant="contained"
-                                                    color="success"
-                                                    startIcon={<IconReceiptRefund />}
+                                                    color="primary"
+                                                    startIcon={<IconPencil />}
                                                 >
-                                                    Mark as paid
+                                                    Edit user
                                                 </RouteBtn>
                                             ) : (
                                                 <Skeleton
@@ -301,7 +228,7 @@ const InvoiceDetail = () => {
                                                     onClick={handleConfirmSendOpen}
                                                     variant="contained"
                                                     color="info"
-                                                    startIcon={<ReplyRoundedIcon />}
+                                                    startIcon={<IconBrandTelegram />}
                                                 >
                                                     Send invoice
                                                 </Button>
@@ -426,67 +353,71 @@ const InvoiceDetail = () => {
                                         </Grid>
                                         <Grid item>
                                             <Grid>
-                                                <Card
-                                                    sx={{
-                                                        bgcolor: '#F9FAFE',
-                                                        borderEndEndRadius: 0,
-                                                        borderEndStartRadius: 0,
-                                                    }}
-                                                >
-                                                    <CardMedia>
-                                                        <TableContainer component={Paper}>
-                                                            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell>Product name</TableCell>
-                                                                        <TableCell align="right">Date</TableCell>
-                                                                        <TableCell align="right">Price</TableCell>
-                                                                        <TableCell align="right">Sold</TableCell>
-                                                                        <TableCell align="right">Remained</TableCell>
-                                                                        <TableCell align="right">Returned</TableCell>
-                                                                        <TableCell align="right">Debt</TableCell>
-                                                                        <TableCell align="right">Pay</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableBody>
-                                                                    {currentInvocieOrders?.map((order, index) => (
-                                                                        <TableRow
-                                                                            key={order?.id}
-                                                                            onClick={() =>
-                                                                                handleOrderRowClick(currentInvocie?.id, index, order?.id)
-                                                                            }
-                                                                            hover
-                                                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                                                        >
-                                                                            <TableCell component="th" scope="row">
-                                                                                {order.product_name}
-                                                                            </TableCell>
-                                                                            <TableCell align="right">
-                                                                                {getDate(order?.updated_at)}
-                                                                            </TableCell>
-                                                                            <TableCell align="right">${order.price}</TableCell>
-                                                                            <TableCell align="right">{order.sold_amount}</TableCell>
-                                                                            <TableCell align="right">{order.remainder_amount}</TableCell>
-                                                                            <TableCell align="right">{order.returned_amount}</TableCell>
-                                                                            <TableCell align="right">${order.debt}</TableCell>
-                                                                            <TableCell
-                                                                                align="right"
-                                                                                sx={{
-                                                                                    '&:hover > svg': {
-                                                                                        fill: '#F9FAFE',
-                                                                                        color: '#5e35b1',
-                                                                                    },
-                                                                                }}
-                                                                            >
-                                                                                <IconReceiptRefund />
-                                                                            </TableCell>
+                                                {currentInvocieOrders?.length ? (
+                                                    <Card
+                                                        sx={{
+                                                            bgcolor: '#F9FAFE',
+                                                            borderEndEndRadius: 0,
+                                                            borderEndStartRadius: 0,
+                                                        }}
+                                                    >
+                                                        <CardMedia>
+                                                            <TableContainer component={Paper}>
+                                                                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                                                    <TableHead>
+                                                                        <TableRow>
+                                                                            <TableCell>Product name</TableCell>
+                                                                            <TableCell align="right">Date</TableCell>
+                                                                            <TableCell align="right">Price</TableCell>
+                                                                            <TableCell align="right">Sold</TableCell>
+                                                                            <TableCell align="right">Remained</TableCell>
+                                                                            <TableCell align="right">Returned</TableCell>
+                                                                            <TableCell align="right">Debt</TableCell>
+                                                                            <TableCell align="right">Pay</TableCell>
                                                                         </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </CardMedia>
-                                                </Card>
+                                                                    </TableHead>
+                                                                    <TableBody>
+                                                                        {currentInvocieOrders?.map((order) => (
+                                                                            <TableRow
+                                                                                key={order?.id}
+                                                                                onClick={() =>
+                                                                                    handleOrderRowClick(order?.user_id, order?.id)
+                                                                                }
+                                                                                hover
+                                                                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                                                            >
+                                                                                <TableCell component="th" scope="row">
+                                                                                    {order.product_name}
+                                                                                </TableCell>
+                                                                                <TableCell align="right">
+                                                                                    {getDate(order?.updated_at)}
+                                                                                </TableCell>
+                                                                                <TableCell align="right">${order.price}</TableCell>
+                                                                                <TableCell align="right">{order.sold_amount}</TableCell>
+                                                                                <TableCell align="right">
+                                                                                    {order.remainder_amount}
+                                                                                </TableCell>
+                                                                                <TableCell align="right">{order.returned_amount}</TableCell>
+                                                                                <TableCell align="right">${order.debt}</TableCell>
+                                                                                <TableCell
+                                                                                    align="right"
+                                                                                    sx={{
+                                                                                        '&:hover > svg': {
+                                                                                            fill: '#F9FAFE',
+                                                                                            color: '#5e35b1',
+                                                                                        },
+                                                                                    }}
+                                                                                >
+                                                                                    <IconReceiptRefund />
+                                                                                </TableCell>
+                                                                            </TableRow>
+                                                                        ))}
+                                                                    </TableBody>
+                                                                </Table>
+                                                            </TableContainer>
+                                                        </CardMedia>
+                                                    </Card>
+                                                ) : null}
                                                 <Card sx={{ bgcolor: '#5e35b1', borderTopRightRadius: 0, borderTopLeftRadius: 0 }}>
                                                     <CardContent
                                                         sx={{

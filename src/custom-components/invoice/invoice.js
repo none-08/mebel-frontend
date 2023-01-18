@@ -7,19 +7,12 @@ export const Invoice = ({ invoice, loading, amount, to, ...props }) => {
     const navigate = useNavigate();
 
     const handleRowClick = (event, id) => {
-        navigate(`/utils/util-invoices/${id}`);
+        navigate(`/invoices/clients-list/${id}`);
     };
 
     if (loading) {
         return [...Array(amount).keys()].map((item) => (
-            <TableRow
-                onClick={(evt) => handleRowClick(evt)}
-                data-to={to}
-                key={item}
-                {...props}
-                hover
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-            >
+            <TableRow key={item} {...props} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 <TableCell component="th" scope="row">
                     <Skeleton variant="span" animation="wave" />
                 </TableCell>

@@ -5,15 +5,21 @@ import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 
 // dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
+const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
 
-// utilities routing
-const Invoices = Loadable(lazy(() => import('views/invoices/invoices/Invoices')));
-const InvoiceDetail = Loadable(lazy(() => import('views/invoices/invoices/Invoice-detail')));
-const InvoiceEdit = Loadable(lazy(() => import('views/invoices/invoices/Invoice-edit')));
+// invoices routing
+const Invoices = Loadable(lazy(() => import('views/invoices/Invoices')));
+const InvoiceDetail = Loadable(lazy(() => import('views/invoices/Invoice-detail')));
+const InvoiceEdit = Loadable(lazy(() => import('views/invoices/Invoice-edit')));
+const InvoiceAddOrder = Loadable(lazy(() => import('views/invoices/Invoice-add-order')));
 
-const RegisterUser = Loadable(lazy(() => import('views/invoices/RegisterUser')));
-const RegisterProduct = Loadable(lazy(() => import('views/invoices/RegisterProduct')));
+const Orders = Loadable(lazy(() => import('views/orders/Orders')));
+const OrderDetail = Loadable(lazy(() => import('views/orders/Order-detail')));
+const OrderEdit = Loadable(lazy(() => import('views/orders/Order-edit')));
+
+const RegisterUser = Loadable(lazy(() => import('views/users/RegisterUser')));
+const UserList = Loadable(lazy(() => import('views/users/edit-user/UserList')));
+const EditUser = Loadable(lazy(() => import('views/users/edit-user/EditUser')));
 
 // sample page routing
 const MarkPaid = Loadable(lazy(() => import('views/mark-paid/index')));
@@ -30,18 +36,13 @@ const MainRoutes = {
         },
         {
             path: 'dashboard',
-            children: [
-                {
-                    path: 'default',
-                    element: <DashboardDefault />,
-                },
-            ],
+            element: <DashboardDefault />,
         },
         {
-            path: 'utils',
+            path: 'invoices',
             children: [
                 {
-                    path: 'util-invoices',
+                    path: 'clients-list',
                     children: [
                         {
                             path: '',
@@ -55,12 +56,38 @@ const MainRoutes = {
                                     element: <InvoiceDetail />,
                                 },
                                 {
-                                    path: 'mark-paid/:item',
+                                    path: 'mark-paid/:orderID',
                                     element: <MarkPaid />,
                                 },
                                 {
                                     path: 'edit',
                                     element: <InvoiceEdit />,
+                                },
+                                {
+                                    path: 'add-order',
+                                    element: <InvoiceAddOrder />,
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    path: 'orders-list',
+                    children: [
+                        {
+                            path: '',
+                            element: <Orders />,
+                        },
+                        {
+                            path: ':id&:orderID',
+                            children: [
+                                {
+                                    path: '',
+                                    element: <OrderDetail />,
+                                },
+                                {
+                                    path: 'edit',
+                                    element: <OrderEdit />,
                                 },
                             ],
                         },
@@ -72,12 +99,21 @@ const MainRoutes = {
             path: 'pages',
             children: [
                 {
-                    path: 'register/user',
+                    path: 'client/register',
                     element: <RegisterUser />,
                 },
                 {
-                    path: 'register/product',
-                    element: <RegisterProduct />,
+                    path: 'client/users',
+                    children: [
+                        {
+                            path: '',
+                            element: <UserList />,
+                        },
+                        {
+                            path: ':id/edit',
+                            element: <EditUser />,
+                        },
+                    ],
                 },
             ],
         },

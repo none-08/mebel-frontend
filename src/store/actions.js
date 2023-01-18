@@ -5,4 +5,4 @@ export const MENU_OPEN = '@customization/MENU_OPEN';
 export const SET_FONT_FAMILY = '@customization/SET_FONT_FAMILY';
 export const SET_BORDER_RADIUS = '@customization/SET_BORDER_RADIUS';
 export const GET_INVOICES = '@invoices/GET_INVOICES';
-export const INVOICES_LOADING = '@invocies/INVOICES_LOADING';
+export const GET_ORDERS = '@orders/GET_ORDERS';
